@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Link Storage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            margin: 5px;
+            width: 250px;
+        }
+        input[type="submit"] {
+            width: auto;
+            cursor: pointer;
+        }
+        .link-list {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .link-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 320px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .link-item a {
+            text-decoration: none;
+            color: #333;
+            font-size: 18px;
+            flex-grow: 1;
+            text-align: center;
+        }
+        .delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>My Link Storage</h1>
+
+    <div class="form-container">
+        <input type="text" id="linkNameInput" placeholder="Enter a name">
+        <input type="text" id="linkInput" placeholder="Enter a URL">
+        <input type="submit" value="Add Link" onclick="addLink()">
+    </div>
+
+    <div class="link-list" id="linkList">
+        <!-- Links will be added here -->
+    </div>
+
+    <script>
+        // Load saved links from localStorage on page load
+        window.onload = () => {
+            const links = JSON.parse(localStorage.getItem('links')) || [];
+            links.forEach((link, index) => {
+                addLinkToPage(link.name, link.url, index);
+            });
+        };
+
+        // Function to add a new link
+        function addLink() {
+            const nameInput = document.getElementById('linkNameInput');
+            const linkInput = document.getElementById('linkInput');
+            const name = nameInput.value.trim();
+            const url = linkInput.value.trim();
+
+            if (name && url) {
+                let links = JSON.parse(localStorage.getItem('links')) || [];
+                links.push({ name, url });
+                localStorage.setItem('links', JSON.stringify(links));
+
+                addLinkToPage(name, url, links.length - 1);
+
+                // Clear input fields
+                nameInput.value = '';
+                linkInput.value = '';
+            } else {
+                alert('Please enter both a name and a valid URL');
+            }
+        }
+
+        // Function to display the link on the page
+        function addLinkToPage(name, url, index) {
+            const linkList = document.getElementById('linkList');
+
+            const linkItem = document.createElement('div');
+            linkItem.classList.add('link-item');
+            linkItem.dataset.index = index; // Store index for deletion
+
+            const linkElement = document.createElement('a');
+            linkElement.href = url;
+            linkElement.target = "_blank";
+            linkElement.textContent = name;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = "Delete";
+            deleteButton.classList.add('delete-btn');
+            deleteButton.onclick = () => deleteLink(index);
+
+            linkItem.appendChild(linkElement);
+            linkItem.appendChild(deleteButton);
+            linkList.appendChild(linkItem);
+        }
+
+        // Function to delete a link
+        function deleteLink(index) {
+            let links = JSON.parse(localStorage.getItem('links')) || [];
+            links.splice(index, 1); // Remove the link from the array
+            localStorage.setItem('links', JSON.stringify(links));
+
+            // Reload the displayed list
+            document.getElementById('linkList').innerHTML = "";
+            links.forEach((link, newIndex) => addLinkToPage(link.name, link.url, newIndex));
+        }
+    </script>
+</body>
+</html>
